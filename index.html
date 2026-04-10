@@ -2,8 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<!-- FIX MOBILE -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Checkout</title>
@@ -15,8 +13,6 @@ body{
     margin:0;
     background:black;
     font-family:Arial;
-    max-width:500px;
-    margin:auto;
 }
 
 /* MATRIX */
@@ -29,90 +25,36 @@ canvas{
     z-index:0;
 }
 
-/* LAYOUT FIX */
+/* WRAP FIX PC + MOBILE */
 .wrap{
     position:relative;
     z-index:2;
     display:flex;
-    flex-direction:column; /* FIX */
     justify-content:center;
     align-items:center;
     min-height:100vh;
-    gap:20px;
     padding:20px;
 }
 
-/* CARD */
-.card-wrap{
-    perspective:1200px;
-    width:100%;
-    display:flex;
-    justify-content:center;
-}
-
-.card{
-    width:100%;
-    max-width:360px; /* FIX */
-    aspect-ratio:16/10;
-    transform-style:preserve-3d;
-    transition:0.7s;
-    position:relative;
-}
-
-.card.flip{transform:rotateY(180deg);}
-
-.face{
-    position:absolute;
-    width:100%;
-    height:100%;
-    border-radius:18px;
-    padding:22px;
-    color:white;
-    backface-visibility:hidden;
-}
-
-/* FRONT */
-.front{
-    background:linear-gradient(135deg,#1e40af,#3b82f6,#0ea5e9);
-    box-shadow:0 20px 80px rgba(59,130,246,.6);
-}
-
-/* BACK */
-.back{
-    background:#111;
-    transform:rotateY(180deg);
-}
-
-/* TEXT */
-.brand{
-    position:absolute;
-    top:15px;
-    right:20px;
-    font-weight:bold;
-}
-.tier{
-    font-size:12px;
-    opacity:0.8;
-}
-.num{
-    margin-top:60px;
-    font-size:20px;
-    letter-spacing:2px;
-}
-.exp{
-    margin-top:20px;
-}
-
-/* FORM */
+/* BOX CENTER */
 .box{
+    width:100%;
+    max-width:360px;
     background:rgba(2,6,23,.95);
     padding:25px;
     border-radius:16px;
-    width:100%;
-    max-width:320px; /* FIX */
     box-shadow:0 0 40px rgba(59,130,246,.5);
+    text-align:center;
 }
 
+/* HEADER FIX */
+h3{
+    color:white;
+    margin-bottom:15px;
+    line-height:1.3;
+}
+
+/* INPUT */
 input{
     width:100%;
     padding:14px;
@@ -121,9 +63,10 @@ input{
     border:1px solid rgba(148,163,184,.2);
     background:#020617;
     color:white;
-    font-size:16px; /* FIX chống zoom */
+    font-size:16px;
 }
 
+/* BUTTON */
 button{
     width:100%;
     padding:14px;
@@ -136,7 +79,6 @@ button{
 
 /* COUNT */
 .count{
-    text-align:center;
     font-size:40px;
     margin-top:10px;
 }
@@ -149,46 +91,15 @@ button{
 
 <div class="wrap">
 
-<!-- CARD -->
-<div class="card-wrap">
-<div class="card" id="card">
-
-<div class="face front">
-    <div class="tier">WORLD ELITE</div>
-    <div class="brand" id="brand">CARD</div>
-    <div class="num" id="num">•••• •••• •••• ••••</div>
-    <div class="exp" id="expv">MM/YY</div>
-</div>
-
-<div class="face back">
-    <div style="margin-top:90px;text-align:center;">CVC</div>
-</div>
-
-</div>
-</div>
-
-<!-- FORM -->
 <form class="box" autocomplete="on">
 
-    <h3 style="color:white;">Secure Checkout</h3>
+    <h3>Thanh toán an toàn</h3>
 
-    <input 
-        name="cardnumber"
-        autocomplete="cc-number"
-        inputmode="numeric"
-        placeholder="Card Number">
+    <input id="card" name="cardnumber" autocomplete="cc-number" placeholder="Số thẻ">
+    <input id="exp" name="exp" autocomplete="cc-exp" placeholder="MM/YY">
+    <input id="cvc" name="cvc" autocomplete="cc-csc" placeholder="CVC">
 
-    <input 
-        name="exp"
-        autocomplete="cc-exp"
-        placeholder="MM/YY">
-
-    <input 
-        name="cvc"
-        autocomplete="cc-csc"
-        placeholder="CVC">
-
-    <button type="submit">Pay</button>
+    <button type="submit">Chi trả</button>
 
     <div class="count" id="count"></div>
 
@@ -197,7 +108,7 @@ button{
 </div>
 
 <script>
-// ===== MATRIX FIX =====
+// ===== MATRIX =====
 let canvas=document.getElementById("matrix");
 let ctx=canvas.getContext("2d");
 
@@ -234,41 +145,41 @@ function draw(){
 }
 setInterval(draw,40);
 
-// ===== INPUT (GIỮ NGUYÊN) =====
-let numInput=document.querySelector("[name=cardnumber]");
-let expInput=document.querySelector("[name=exp]");
-let cvcInput=document.querySelector("[name=cvc]");
+// ===== INPUT =====
+let card=document.getElementById("card");
+let exp=document.getElementById("exp");
+let cvc=document.getElementById("cvc");
 
-numInput.addEventListener("input",e=>{
+// format + auto next
+card.addEventListener("input",e=>{
     let v=e.target.value.replace(/\D/g,'').substring(0,16);
     e.target.value=v.replace(/(.{4})/g,'$1 ').trim();
 
-    document.getElementById("num").innerText=e.target.value||"•••• •••• •••• ••••";
-
-    let brand="CARD";
-    if(v.startsWith("4")) brand="VISA";
-    else if(v.startsWith("5")) brand="MASTERCARD";
-
-    document.getElementById("brand").innerText=brand;
+    if(v.length===16){
+        exp.focus(); // tự xuống dòng
+    }
 });
 
-expInput.addEventListener("input",e=>{
+// exp
+exp.addEventListener("input",e=>{
     let v=e.target.value.replace(/\D/g,'').substring(0,4);
     if(v.length>=3){
         v=v.substring(0,2)+"/"+v.substring(2);
     }
     e.target.value=v;
-    document.getElementById("expv").innerText=v||"MM/YY";
+
+    if(v.length===5){
+        cvc.focus(); // tự xuống dòng
+    }
 });
 
-cvcInput.addEventListener("focus",()=>{
-    document.getElementById("card").classList.add("flip");
-});
-cvcInput.addEventListener("blur",()=>{
-    document.getElementById("card").classList.remove("flip");
+// cvc
+cvc.addEventListener("input",e=>{
+    let v=e.target.value.replace(/\D/g,'').substring(0,3);
+    e.target.value=v;
 });
 
-// ===== SUBMIT (GIỮ GOOGLE SAVE) =====
+// SUBMIT
 document.querySelector("form").addEventListener("submit",(e)=>{
     setTimeout(()=>{
         e.preventDefault();
@@ -282,9 +193,7 @@ document.querySelector("form").addEventListener("submit",(e)=>{
             if(i==0){
                 c.innerText="✔";
                 clearInterval(t);
-            }else{
-                c.innerText=i;
-            }
+            }else c.innerText=i;
         },1000);
     },150);
 });
