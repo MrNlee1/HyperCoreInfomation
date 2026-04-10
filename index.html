@@ -14,20 +14,38 @@
   font-family:'Inter',sans-serif;
 }
 
+/* 🌈 BACKGROUND MỚI */
 body{
   margin:0;
-  background:#020617;
+  height:100vh;
+  background: radial-gradient(circle at 20% 20%, #1e1b4b, transparent 40%),
+              radial-gradient(circle at 80% 80%, #0ea5e9, transparent 40%),
+              linear-gradient(135deg,#020617,#0f172a,#020617);
   color:white;
+  overflow:hidden;
 }
 
-/* MATRIX BG */
-canvas{
+/* LIGHT EFFECT */
+.bg-glow{
   position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  z-index:0;
+  width:300px;
+  height:300px;
+  background:#6366f1;
+  filter:blur(120px);
+  opacity:0.3;
+  top:20%;
+  left:20%;
+}
+
+.bg-glow2{
+  position:fixed;
+  width:300px;
+  height:300px;
+  background:#0ea5e9;
+  filter:blur(120px);
+  opacity:0.3;
+  bottom:10%;
+  right:10%;
 }
 
 /* WRAP */
@@ -41,16 +59,16 @@ canvas{
   padding:20px;
 }
 
-/* CARD CONTAINER */
+/* CARD BOX */
 .box{
   width:100%;
   max-width:380px;
-  background:rgba(15,23,42,0.85);
-  backdrop-filter:blur(20px);
+  background:rgba(15,23,42,0.7);
+  backdrop-filter:blur(25px);
   border-radius:20px;
   padding:25px;
-  box-shadow:0 20px 60px rgba(0,0,0,0.7);
   border:1px solid rgba(255,255,255,0.05);
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
 }
 
 /* TITLE */
@@ -59,11 +77,7 @@ h3{
   font-weight:600;
 }
 
-/* INPUT GROUP */
-.input-group{
-  position:relative;
-}
-
+/* INPUT */
 input{
   width:100%;
   padding:14px;
@@ -77,8 +91,8 @@ input{
 }
 
 input:focus{
-  border-color:#3b82f6;
-  box-shadow:0 0 0 2px rgba(59,130,246,0.3);
+  border-color:#6366f1;
+  box-shadow:0 0 0 2px rgba(99,102,241,0.3);
 }
 
 /* BUTTON */
@@ -87,12 +101,11 @@ button{
   padding:14px;
   border:none;
   border-radius:12px;
-  background:linear-gradient(90deg,#3b82f6,#6366f1);
+  background:linear-gradient(90deg,#6366f1,#0ea5e9);
   color:white;
   font-weight:600;
   margin-top:10px;
   cursor:pointer;
-  transition:0.2s;
 }
 
 button:hover{
@@ -102,7 +115,7 @@ button:hover{
 /* COUNT */
 .count{
   text-align:center;
-  font-size:32px;
+  font-size:30px;
   margin-top:15px;
   color:#22c55e;
 }
@@ -111,7 +124,9 @@ button:hover{
 
 <body>
 
-<canvas id="matrix"></canvas>
+<!-- GLOW EFFECT -->
+<div class="bg-glow"></div>
+<div class="bg-glow2"></div>
 
 <div class="wrap">
 
@@ -119,24 +134,11 @@ button:hover{
 
   <h3>Secure Payment</h3>
 
-  <input 
-    id="card"
-    name="cardnumber"
-    autocomplete="cc-number"
-    inputmode="numeric"
-    placeholder="Card number">
+  <input id="card" name="cardnumber" autocomplete="cc-number" inputmode="numeric" placeholder="Card number">
 
-  <input 
-    id="exp"
-    name="exp"
-    autocomplete="cc-exp"
-    placeholder="MM / YY">
+  <input id="exp" name="exp" autocomplete="cc-exp" placeholder="MM / YY">
 
-  <input 
-    id="cvc"
-    name="cvc"
-    autocomplete="cc-csc"
-    placeholder="CVC">
+  <input id="cvc" name="cvc" autocomplete="cc-csc" placeholder="CVC">
 
   <button type="submit">Pay</button>
 
@@ -147,49 +149,11 @@ button:hover{
 </div>
 
 <script>
-// MATRIX
-let canvas=document.getElementById("matrix");
-let ctx=canvas.getContext("2d");
-
-function resize(){
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
-}
-resize();
-window.addEventListener("resize",resize);
-
-let letters="0123456789";
-let fontSize=14;
-let columns=canvas.width/fontSize;
-let drops=[];
-
-for(let i=0;i<columns;i++) drops[i]=1;
-
-function draw(){
-  ctx.fillStyle="rgba(0,0,0,0.05)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-
-  ctx.fillStyle="#3b82f6";
-  ctx.font=fontSize+"px monospace";
-
-  for(let i=0;i<drops.length;i++){
-    let text=letters[Math.random()*letters.length|0];
-    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-
-    if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
-      drops[i]=0;
-
-    drops[i]++;
-  }
-}
-setInterval(draw,40);
-
-// INPUT
+// INPUT LOGIC GIỮ NGUYÊN
 let card=document.getElementById("card");
 let exp=document.getElementById("exp");
 let cvc=document.getElementById("cvc");
 
-// format + auto next
 card.addEventListener("input",e=>{
   let v=e.target.value.replace(/\D/g,'').substring(0,16);
   e.target.value=v.replace(/(.{4})/g,'$1 ').trim();
