@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- FIX MOBILE -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Checkout</title>
 
 <style>
@@ -10,7 +13,6 @@
 body{
     margin:0;
     background:black;
-    overflow:hidden;
     font-family:Arial;
 }
 
@@ -19,6 +21,9 @@ canvas{
     position:fixed;
     top:0;
     left:0;
+    width:100%;
+    height:100%;
+    z-index:0;
 }
 
 /* LAYOUT */
@@ -28,15 +33,18 @@ canvas{
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
-    gap:40px;
+    min-height:100vh;
+    gap:30px;
+    padding:15px;
+    flex-wrap:wrap;
 }
 
 /* CARD */
 .card-wrap{perspective:1200px;}
 .card{
-    width:360px;
-    height:220px;
+    width:100%;
+    max-width:360px;
+    aspect-ratio:16/10;
     transform-style:preserve-3d;
     transition:0.7s;
     position:relative;
@@ -48,7 +56,7 @@ canvas{
     width:100%;
     height:100%;
     border-radius:18px;
-    padding:22px;
+    padding:20px;
     color:white;
     backface-visibility:hidden;
 }
@@ -65,20 +73,6 @@ canvas{
     transform:rotateY(180deg);
 }
 
-/* SCANLINE */
-.face::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:18px;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(255,255,255,0.05) 3px
-    );
-}
-
 /* TEXT */
 .brand{
     position:absolute;
@@ -92,7 +86,7 @@ canvas{
 }
 .num{
     margin-top:60px;
-    font-size:22px;
+    font-size:20px;
     letter-spacing:2px;
 }
 .exp{
@@ -102,9 +96,10 @@ canvas{
 /* FORM */
 .box{
     background:rgba(2,6,23,.95);
-    padding:25px;
+    padding:20px;
     border-radius:16px;
-    width:320px;
+    width:100%;
+    max-width:320px;
     box-shadow:0 0 40px rgba(59,130,246,.5);
 }
 
@@ -116,7 +111,7 @@ input{
     border:1px solid rgba(148,163,184,.2);
     background:#020617;
     color:white;
-    outline:none;
+    font-size:16px;
 }
 
 button{
@@ -135,6 +130,11 @@ button{
     text-align:center;
     font-size:40px;
     margin-top:10px;
+}
+
+/* MOBILE */
+@media(max-width:480px){
+    .num{font-size:18px}
 }
 </style>
 </head>
@@ -157,7 +157,7 @@ button{
 </div>
 
 <div class="face back">
-    <div style="margin-top:90px;text-align:center;">CVC</div>
+    <div style="margin-top:80px;text-align:center;">CVC</div>
 </div>
 
 </div>
@@ -184,7 +184,7 @@ button{
         autocomplete="cc-csc"
         placeholder="CVC">
 
-    <button type="button" onclick="start()">Pay</button>
+    <button type="submit">Pay</button>
 
     <div class="count" id="count"></div>
 
@@ -193,18 +193,28 @@ button{
 </div>
 
 <script>
-// ===== MATRIX =====
+// ===== MATRIX (FIX RESIZE) =====
 let canvas=document.getElementById("matrix");
 let ctx=canvas.getContext("2d");
-canvas.height=innerHeight;
-canvas.width=innerWidth;
+
+function resize(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener("resize",resize);
 
 let letters="0123456789";
 let fontSize=14;
-let columns=canvas.width/fontSize;
+let columns;
 let drops=[];
 
-for(let i=0;i<columns;i++) drops[i]=1;
+function init(){
+    columns=canvas.width/fontSize;
+    drops=[];
+    for(let i=0;i<columns;i++) drops[i]=1;
+}
+init();
 
 function draw(){
     ctx.fillStyle="rgba(0,0,0,0.05)";
@@ -214,7 +224,7 @@ function draw(){
     ctx.font=fontSize+"px monospace";
 
     for(let i=0;i<drops.length;i++){
-        let text=letters[Math.floor(Math.random()*letters.length)];
+        let text=letters[Math.random()*letters.length|0];
         ctx.fillText(text,i*fontSize,drops[i]*fontSize);
 
         if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
@@ -223,7 +233,7 @@ function draw(){
         drops[i]++;
     }
 }
-setInterval(draw,33);
+setInterval(draw,40);
 
 // ===== INPUT =====
 let numInput=document.querySelector("[name=cardnumber]");
@@ -243,7 +253,6 @@ numInput.addEventListener("input",e=>{
     document.getElementById("brand").innerText=brand;
 });
 
-// DATE AUTO /
 expInput.addEventListener("input",e=>{
     let v=e.target.value.replace(/\D/g,'').substring(0,4);
     if(v.length>=3){
@@ -253,7 +262,6 @@ expInput.addEventListener("input",e=>{
     document.getElementById("expv").innerText=v||"MM/YY";
 });
 
-// FLIP CARD
 cvcInput.addEventListener("focus",()=>{
     document.getElementById("card").classList.add("flip");
 });
@@ -261,22 +269,28 @@ cvcInput.addEventListener("blur",()=>{
     document.getElementById("card").classList.remove("flip");
 });
 
-// COUNTDOWN
-function start(){
-    let c=document.getElementById("count");
-    let i=3;
-    c.innerText=i;
+// ===== SUBMIT (GIỮ GOOGLE SAVE CARD) =====
+document.querySelector("form").addEventListener("submit",(e)=>{
 
-    let t=setInterval(()=>{
-        i--;
-        if(i==0){
-            c.innerText="✔";
-            clearInterval(t);
-        }else{
-            c.innerText=i;
-        }
-    },1000);
-}
+    setTimeout(()=>{
+        e.preventDefault();
+
+        let c=document.getElementById("count");
+        let i=3;
+        c.innerText=i;
+
+        let t=setInterval(()=>{
+            i--;
+            if(i==0){
+                c.innerText="✔";
+                clearInterval(t);
+            }else{
+                c.innerText=i;
+            }
+        },1000);
+    },150);
+
+});
 </script>
 
 </body>
