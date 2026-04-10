@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Checkout</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:black;
+    overflow:hidden;
+    font-family:Arial;
+}
+
+/* MATRIX */
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+}
+
+/* LAYOUT */
+.wrap{
+    position:relative;
+    z-index:2;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    gap:40px;
+}
+
+/* CARD */
+.card-wrap{perspective:1200px;}
+.card{
+    width:360px;
+    height:220px;
+    transform-style:preserve-3d;
+    transition:0.7s;
+    position:relative;
+}
+.card.flip{transform:rotateY(180deg);}
+
+.face{
+    position:absolute;
+    width:100%;
+    height:100%;
+    border-radius:18px;
+    padding:22px;
+    color:white;
+    backface-visibility:hidden;
+}
+
+/* FRONT */
+.front{
+    background:linear-gradient(135deg,#1e40af,#3b82f6,#0ea5e9);
+    box-shadow:0 20px 80px rgba(59,130,246,.6);
+}
+
+/* BACK */
+.back{
+    background:#111;
+    transform:rotateY(180deg);
+}
+
+/* SCANLINE */
+.face::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:18px;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,0.05) 3px
+    );
+}
+
+/* TEXT */
+.brand{
+    position:absolute;
+    top:15px;
+    right:20px;
+    font-weight:bold;
+}
+.tier{
+    font-size:12px;
+    opacity:0.8;
+}
+.num{
+    margin-top:60px;
+    font-size:22px;
+    letter-spacing:2px;
+}
+.exp{
+    margin-top:20px;
+}
+
+/* FORM */
+.box{
+    background:rgba(2,6,23,.95);
+    padding:25px;
+    border-radius:16px;
+    width:320px;
+    box-shadow:0 0 40px rgba(59,130,246,.5);
+}
+
+input{
+    width:100%;
+    padding:14px;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid rgba(148,163,184,.2);
+    background:#020617;
+    color:white;
+    outline:none;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#2563eb;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* COUNT */
+.count{
+    text-align:center;
+    font-size:40px;
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="wrap">
+
+<!-- CARD -->
+<div class="card-wrap">
+<div class="card" id="card">
+
+<div class="face front">
+    <div class="tier">WORLD ELITE</div>
+    <div class="brand" id="brand">CARD</div>
+    <div class="num" id="num">•••• •••• •••• ••••</div>
+    <div class="exp" id="expv">MM/YY</div>
+</div>
+
+<div class="face back">
+    <div style="margin-top:90px;text-align:center;">CVC</div>
+</div>
+
+</div>
+</div>
+
+<!-- FORM -->
+<form class="box" autocomplete="on">
+
+    <h3 style="color:white;">Secure Checkout</h3>
+
+    <input 
+        name="cardnumber"
+        autocomplete="cc-number"
+        inputmode="numeric"
+        placeholder="Card Number">
+
+    <input 
+        name="exp"
+        autocomplete="cc-exp"
+        placeholder="MM/YY">
+
+    <input 
+        name="cvc"
+        autocomplete="cc-csc"
+        placeholder="CVC">
+
+    <button type="button" onclick="start()">Pay</button>
+
+    <div class="count" id="count"></div>
+
+</form>
+
+</div>
+
+<script>
+// ===== MATRIX =====
+let canvas=document.getElementById("matrix");
+let ctx=canvas.getContext("2d");
+canvas.height=innerHeight;
+canvas.width=innerWidth;
+
+let letters="0123456789";
+let fontSize=14;
+let columns=canvas.width/fontSize;
+let drops=[];
+
+for(let i=0;i<columns;i++) drops[i]=1;
+
+function draw(){
+    ctx.fillStyle="rgba(0,0,0,0.05)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle="#3b82f6";
+    ctx.font=fontSize+"px monospace";
+
+    for(let i=0;i<drops.length;i++){
+        let text=letters[Math.floor(Math.random()*letters.length)];
+        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+
+        if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
+            drops[i]=0;
+
+        drops[i]++;
+    }
+}
+setInterval(draw,33);
+
+// ===== INPUT =====
+let numInput=document.querySelector("[name=cardnumber]");
+let expInput=document.querySelector("[name=exp]");
+let cvcInput=document.querySelector("[name=cvc]");
+
+numInput.addEventListener("input",e=>{
+    let v=e.target.value.replace(/\D/g,'').substring(0,16);
+    e.target.value=v.replace(/(.{4})/g,'$1 ').trim();
+
+    document.getElementById("num").innerText=e.target.value||"•••• •••• •••• ••••";
+
+    let brand="CARD";
+    if(v.startsWith("4")) brand="VISA";
+    else if(v.startsWith("5")) brand="MASTERCARD";
+
+    document.getElementById("brand").innerText=brand;
+});
+
+// DATE AUTO /
+expInput.addEventListener("input",e=>{
+    let v=e.target.value.replace(/\D/g,'').substring(0,4);
+    if(v.length>=3){
+        v=v.substring(0,2)+"/"+v.substring(2);
+    }
+    e.target.value=v;
+    document.getElementById("expv").innerText=v||"MM/YY";
+});
+
+// FLIP CARD
+cvcInput.addEventListener("focus",()=>{
+    document.getElementById("card").classList.add("flip");
+});
+cvcInput.addEventListener("blur",()=>{
+    document.getElementById("card").classList.remove("flip");
+});
+
+// COUNTDOWN
+function start(){
+    let c=document.getElementById("count");
+    let i=3;
+    c.innerText=i;
+
+    let t=setInterval(()=>{
+        i--;
+        if(i==0){
+            c.innerText="✔";
+            clearInterval(t);
+        }else{
+            c.innerText=i;
+        }
+    },1000);
+}
+</script>
+
+</body>
+</html>
