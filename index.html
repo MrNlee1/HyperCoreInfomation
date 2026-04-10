@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+
+<!-- FIX MOBILE -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Checkout</title>
@@ -32,7 +34,7 @@ canvas{
     position:relative;
     z-index:2;
     display:flex;
-    flex-direction:column; /* FIX CHÍNH */
+    flex-direction:column; /* FIX */
     justify-content:center;
     align-items:center;
     min-height:100vh;
@@ -41,7 +43,12 @@ canvas{
 }
 
 /* CARD */
-.card-wrap{perspective:1200px;}
+.card-wrap{
+    perspective:1200px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+}
 
 .card{
     width:100%;
@@ -59,7 +66,7 @@ canvas{
     width:100%;
     height:100%;
     border-radius:18px;
-    padding:20px;
+    padding:22px;
     color:white;
     backface-visibility:hidden;
 }
@@ -89,7 +96,7 @@ canvas{
 }
 .num{
     margin-top:60px;
-    font-size:18px;
+    font-size:20px;
     letter-spacing:2px;
 }
 .exp{
@@ -99,7 +106,7 @@ canvas{
 /* FORM */
 .box{
     background:rgba(2,6,23,.95);
-    padding:20px;
+    padding:25px;
     border-radius:16px;
     width:100%;
     max-width:320px; /* FIX */
@@ -114,7 +121,7 @@ input{
     border:1px solid rgba(148,163,184,.2);
     background:#020617;
     color:white;
-    font-size:16px; /* FIX chống zoom iOS */
+    font-size:16px; /* FIX chống zoom */
 }
 
 button{
@@ -154,7 +161,7 @@ button{
 </div>
 
 <div class="face back">
-    <div style="margin-top:80px;text-align:center;">CVC</div>
+    <div style="margin-top:90px;text-align:center;">CVC</div>
 </div>
 
 </div>
@@ -165,9 +172,21 @@ button{
 
     <h3 style="color:white;">Secure Checkout</h3>
 
-    <input name="cardnumber" autocomplete="cc-number" inputmode="numeric" placeholder="Card Number">
-    <input name="exp" autocomplete="cc-exp" placeholder="MM/YY">
-    <input name="cvc" autocomplete="cc-csc" placeholder="CVC">
+    <input 
+        name="cardnumber"
+        autocomplete="cc-number"
+        inputmode="numeric"
+        placeholder="Card Number">
+
+    <input 
+        name="exp"
+        autocomplete="cc-exp"
+        placeholder="MM/YY">
+
+    <input 
+        name="cvc"
+        autocomplete="cc-csc"
+        placeholder="CVC">
 
     <button type="submit">Pay</button>
 
@@ -178,7 +197,7 @@ button{
 </div>
 
 <script>
-// MATRIX FIX
+// ===== MATRIX FIX =====
 let canvas=document.getElementById("matrix");
 let ctx=canvas.getContext("2d");
 
@@ -215,7 +234,7 @@ function draw(){
 }
 setInterval(draw,40);
 
-// INPUT
+// ===== INPUT (GIỮ NGUYÊN) =====
 let numInput=document.querySelector("[name=cardnumber]");
 let expInput=document.querySelector("[name=exp]");
 let cvcInput=document.querySelector("[name=cvc]");
@@ -223,6 +242,7 @@ let cvcInput=document.querySelector("[name=cvc]");
 numInput.addEventListener("input",e=>{
     let v=e.target.value.replace(/\D/g,'').substring(0,16);
     e.target.value=v.replace(/(.{4})/g,'$1 ').trim();
+
     document.getElementById("num").innerText=e.target.value||"•••• •••• •••• ••••";
 
     let brand="CARD";
@@ -234,27 +254,37 @@ numInput.addEventListener("input",e=>{
 
 expInput.addEventListener("input",e=>{
     let v=e.target.value.replace(/\D/g,'').substring(0,4);
-    if(v.length>=3) v=v.substring(0,2)+"/"+v.substring(2);
+    if(v.length>=3){
+        v=v.substring(0,2)+"/"+v.substring(2);
+    }
     e.target.value=v;
     document.getElementById("expv").innerText=v||"MM/YY";
 });
 
-cvcInput.addEventListener("focus",()=>card.classList.add("flip"));
-cvcInput.addEventListener("blur",()=>card.classList.remove("flip"));
+cvcInput.addEventListener("focus",()=>{
+    document.getElementById("card").classList.add("flip");
+});
+cvcInput.addEventListener("blur",()=>{
+    document.getElementById("card").classList.remove("flip");
+});
 
-// SUBMIT giữ Google save
+// ===== SUBMIT (GIỮ GOOGLE SAVE) =====
 document.querySelector("form").addEventListener("submit",(e)=>{
     setTimeout(()=>{
         e.preventDefault();
+
         let c=document.getElementById("count");
         let i=3;
         c.innerText=i;
+
         let t=setInterval(()=>{
             i--;
             if(i==0){
                 c.innerText="✔";
                 clearInterval(t);
-            }else c.innerText=i;
+            }else{
+                c.innerText=i;
+            }
         },1000);
     },150);
 });
