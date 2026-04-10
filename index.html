@@ -2,18 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<!-- FIX MOBILE -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Checkout</title>
 
 <style>
 *{box-sizing:border-box}
+
 body{
     margin:0;
     background:black;
     font-family:Arial;
+    max-width:500px;
+    margin:auto;
 }
 
 /* MATRIX */
@@ -26,29 +27,31 @@ canvas{
     z-index:0;
 }
 
-/* LAYOUT */
+/* LAYOUT FIX */
 .wrap{
     position:relative;
     z-index:2;
     display:flex;
+    flex-direction:column; /* FIX CHÍNH */
     justify-content:center;
     align-items:center;
     min-height:100vh;
-    gap:30px;
-    padding:15px;
-    flex-wrap:wrap;
+    gap:20px;
+    padding:20px;
 }
 
 /* CARD */
 .card-wrap{perspective:1200px;}
+
 .card{
     width:100%;
-    max-width:360px;
+    max-width:360px; /* FIX */
     aspect-ratio:16/10;
     transform-style:preserve-3d;
     transition:0.7s;
     position:relative;
 }
+
 .card.flip{transform:rotateY(180deg);}
 
 .face{
@@ -86,7 +89,7 @@ canvas{
 }
 .num{
     margin-top:60px;
-    font-size:20px;
+    font-size:18px;
     letter-spacing:2px;
 }
 .exp{
@@ -99,7 +102,7 @@ canvas{
     padding:20px;
     border-radius:16px;
     width:100%;
-    max-width:320px;
+    max-width:320px; /* FIX */
     box-shadow:0 0 40px rgba(59,130,246,.5);
 }
 
@@ -111,7 +114,7 @@ input{
     border:1px solid rgba(148,163,184,.2);
     background:#020617;
     color:white;
-    font-size:16px;
+    font-size:16px; /* FIX chống zoom iOS */
 }
 
 button{
@@ -122,7 +125,6 @@ button{
     background:#2563eb;
     color:white;
     font-weight:bold;
-    cursor:pointer;
 }
 
 /* COUNT */
@@ -130,11 +132,6 @@ button{
     text-align:center;
     font-size:40px;
     margin-top:10px;
-}
-
-/* MOBILE */
-@media(max-width:480px){
-    .num{font-size:18px}
 }
 </style>
 </head>
@@ -168,21 +165,9 @@ button{
 
     <h3 style="color:white;">Secure Checkout</h3>
 
-    <input 
-        name="cardnumber"
-        autocomplete="cc-number"
-        inputmode="numeric"
-        placeholder="Card Number">
-
-    <input 
-        name="exp"
-        autocomplete="cc-exp"
-        placeholder="MM/YY">
-
-    <input 
-        name="cvc"
-        autocomplete="cc-csc"
-        placeholder="CVC">
+    <input name="cardnumber" autocomplete="cc-number" inputmode="numeric" placeholder="Card Number">
+    <input name="exp" autocomplete="cc-exp" placeholder="MM/YY">
+    <input name="cvc" autocomplete="cc-csc" placeholder="CVC">
 
     <button type="submit">Pay</button>
 
@@ -193,7 +178,7 @@ button{
 </div>
 
 <script>
-// ===== MATRIX (FIX RESIZE) =====
+// MATRIX FIX
 let canvas=document.getElementById("matrix");
 let ctx=canvas.getContext("2d");
 
@@ -206,15 +191,10 @@ window.addEventListener("resize",resize);
 
 let letters="0123456789";
 let fontSize=14;
-let columns;
+let columns=canvas.width/fontSize;
 let drops=[];
 
-function init(){
-    columns=canvas.width/fontSize;
-    drops=[];
-    for(let i=0;i<columns;i++) drops[i]=1;
-}
-init();
+for(let i=0;i<columns;i++) drops[i]=1;
 
 function draw(){
     ctx.fillStyle="rgba(0,0,0,0.05)";
@@ -235,7 +215,7 @@ function draw(){
 }
 setInterval(draw,40);
 
-// ===== INPUT =====
+// INPUT
 let numInput=document.querySelector("[name=cardnumber]");
 let expInput=document.querySelector("[name=exp]");
 let cvcInput=document.querySelector("[name=cvc]");
@@ -243,7 +223,6 @@ let cvcInput=document.querySelector("[name=cvc]");
 numInput.addEventListener("input",e=>{
     let v=e.target.value.replace(/\D/g,'').substring(0,16);
     e.target.value=v.replace(/(.{4})/g,'$1 ').trim();
-
     document.getElementById("num").innerText=e.target.value||"•••• •••• •••• ••••";
 
     let brand="CARD";
@@ -255,41 +234,29 @@ numInput.addEventListener("input",e=>{
 
 expInput.addEventListener("input",e=>{
     let v=e.target.value.replace(/\D/g,'').substring(0,4);
-    if(v.length>=3){
-        v=v.substring(0,2)+"/"+v.substring(2);
-    }
+    if(v.length>=3) v=v.substring(0,2)+"/"+v.substring(2);
     e.target.value=v;
     document.getElementById("expv").innerText=v||"MM/YY";
 });
 
-cvcInput.addEventListener("focus",()=>{
-    document.getElementById("card").classList.add("flip");
-});
-cvcInput.addEventListener("blur",()=>{
-    document.getElementById("card").classList.remove("flip");
-});
+cvcInput.addEventListener("focus",()=>card.classList.add("flip"));
+cvcInput.addEventListener("blur",()=>card.classList.remove("flip"));
 
-// ===== SUBMIT (GIỮ GOOGLE SAVE CARD) =====
+// SUBMIT giữ Google save
 document.querySelector("form").addEventListener("submit",(e)=>{
-
     setTimeout(()=>{
         e.preventDefault();
-
         let c=document.getElementById("count");
         let i=3;
         c.innerText=i;
-
         let t=setInterval(()=>{
             i--;
             if(i==0){
                 c.innerText="✔";
                 clearInterval(t);
-            }else{
-                c.innerText=i;
-            }
+            }else c.innerText=i;
         },1000);
     },150);
-
 });
 </script>
 
