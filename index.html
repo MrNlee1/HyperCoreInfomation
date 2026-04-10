@@ -6,80 +6,105 @@
 
 <title>Card Information</title>
 
-<style>
-*{box-sizing:border-box}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-body{
-    margin:0;
-    background:black;
-    font-family:Arial;
+<style>
+*{
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
 }
 
-/* MATRIX */
+body{
+  margin:0;
+  background:#020617;
+  color:white;
+}
+
+/* MATRIX BG */
 canvas{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    z-index:0;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:0;
 }
 
 /* WRAP */
 .wrap{
-    position:relative;
-    z-index:2;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-    padding:20px;
+  position:relative;
+  z-index:2;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  padding:20px;
 }
 
-/* BOX */
+/* CARD CONTAINER */
 .box{
-    width:100%;
-    max-width:360px;
-    background:rgba(2,6,23,.95);
-    padding:25px;
-    border-radius:16px;
-    box-shadow:0 0 40px rgba(59,130,246,.5);
-    text-align:center;
+  width:100%;
+  max-width:380px;
+  background:rgba(15,23,42,0.85);
+  backdrop-filter:blur(20px);
+  border-radius:20px;
+  padding:25px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.7);
+  border:1px solid rgba(255,255,255,0.05);
 }
 
-/* HEADER */
+/* TITLE */
 h3{
-    color:white;
-    margin-bottom:15px;
+  margin-bottom:20px;
+  font-weight:600;
 }
 
-/* INPUT */
+/* INPUT GROUP */
+.input-group{
+  position:relative;
+}
+
 input{
-    width:100%;
-    padding:14px;
-    margin:10px 0;
-    border-radius:10px;
-    border:1px solid rgba(148,163,184,.2);
-    background:#020617;
-    color:white;
-    font-size:16px;
+  width:100%;
+  padding:14px;
+  margin:12px 0;
+  border-radius:12px;
+  border:1px solid rgba(148,163,184,.2);
+  background:#020617;
+  color:white;
+  font-size:16px;
+  transition:0.2s;
+}
+
+input:focus{
+  border-color:#3b82f6;
+  box-shadow:0 0 0 2px rgba(59,130,246,0.3);
 }
 
 /* BUTTON */
 button{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    background:#2563eb;
-    color:white;
-    font-weight:bold;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(90deg,#3b82f6,#6366f1);
+  color:white;
+  font-weight:600;
+  margin-top:10px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+button:hover{
+  opacity:0.9;
 }
 
 /* COUNT */
 .count{
-    font-size:40px;
-    margin-top:10px;
+  text-align:center;
+  font-size:32px;
+  margin-top:15px;
+  color:#22c55e;
 }
 </style>
 </head>
@@ -92,20 +117,30 @@ button{
 
 <form class="box" autocomplete="on">
 
-    <!-- TITLE -->
-    <h3>Secure Payment</h3>
+  <h3>Secure Payment</h3>
 
-    <!-- INPUT -->
-    <input id="card" name="cardnumber" autocomplete="cc-number" placeholder="Card Number">
+  <input 
+    id="card"
+    name="cardnumber"
+    autocomplete="cc-number"
+    inputmode="numeric"
+    placeholder="Card number">
 
-    <input id="exp" name="exp" autocomplete="cc-exp" placeholder="MM/YY">
+  <input 
+    id="exp"
+    name="exp"
+    autocomplete="cc-exp"
+    placeholder="MM / YY">
 
-    <input id="cvc" name="cvc" autocomplete="cc-csc" placeholder="CVC">
+  <input 
+    id="cvc"
+    name="cvc"
+    autocomplete="cc-csc"
+    placeholder="CVC">
 
-    <!-- BUTTON -->
-    <button type="submit">Pay</button>
+  <button type="submit">Pay</button>
 
-    <div class="count" id="count"></div>
+  <div class="count" id="count"></div>
 
 </form>
 
@@ -117,8 +152,8 @@ let canvas=document.getElementById("matrix");
 let ctx=canvas.getContext("2d");
 
 function resize(){
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
 }
 resize();
 window.addEventListener("resize",resize);
@@ -131,72 +166,75 @@ let drops=[];
 for(let i=0;i<columns;i++) drops[i]=1;
 
 function draw(){
-    ctx.fillStyle="rgba(0,0,0,0.05)";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-    ctx.fillStyle="#3b82f6";
-    ctx.font=fontSize+"px monospace";
+  ctx.fillStyle="#3b82f6";
+  ctx.font=fontSize+"px monospace";
 
-    for(let i=0;i<drops.length;i++){
-        let text=letters[Math.random()*letters.length|0];
-        ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+  for(let i=0;i<drops.length;i++){
+    let text=letters[Math.random()*letters.length|0];
+    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
 
-        if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
-            drops[i]=0;
+    if(drops[i]*fontSize>canvas.height && Math.random()>0.975)
+      drops[i]=0;
 
-        drops[i]++;
-    }
+    drops[i]++;
+  }
 }
 setInterval(draw,40);
 
-// INPUT + AUTO NEXT
+// INPUT
 let card=document.getElementById("card");
 let exp=document.getElementById("exp");
 let cvc=document.getElementById("cvc");
 
+// format + auto next
 card.addEventListener("input",e=>{
-    let v=e.target.value.replace(/\D/g,'').substring(0,16);
-    e.target.value=v.replace(/(.{4})/g,'$1 ').trim();
+  let v=e.target.value.replace(/\D/g,'').substring(0,16);
+  e.target.value=v.replace(/(.{4})/g,'$1 ').trim();
 
-    if(v.length===16){
-        exp.focus();
-    }
+  if(v.length===16){
+    exp.focus();
+  }
 });
 
 exp.addEventListener("input",e=>{
-    let v=e.target.value.replace(/\D/g,'').substring(0,4);
-    if(v.length>=3){
-        v=v.substring(0,2)+"/"+v.substring(2);
-    }
-    e.target.value=v;
+  let v=e.target.value.replace(/\D/g,'').substring(0,4);
+  if(v.length>=3){
+    v=v.substring(0,2)+"/"+v.substring(2);
+  }
+  e.target.value=v;
 
-    if(v.length===5){
-        cvc.focus();
-    }
+  if(v.length===5){
+    cvc.focus();
+  }
 });
 
 cvc.addEventListener("input",e=>{
-    let v=e.target.value.replace(/\D/g,'').substring(0,3);
-    e.target.value=v;
+  let v=e.target.value.replace(/\D/g,'').substring(0,3);
+  e.target.value=v;
 });
 
-// SUBMIT
+// SUBMIT (GIỮ SAVE CARD)
 document.querySelector("form").addEventListener("submit",(e)=>{
-    setTimeout(()=>{
-        e.preventDefault();
+  setTimeout(()=>{
+    e.preventDefault();
 
-        let c=document.getElementById("count");
-        let i=3;
+    let c=document.getElementById("count");
+    let i=3;
+    c.innerText=i;
+
+    let t=setInterval(()=>{
+      i--;
+      if(i==0){
+        c.innerText="✔ Done";
+        clearInterval(t);
+      }else{
         c.innerText=i;
-
-        let t=setInterval(()=>{
-            i--;
-            if(i==0){
-                c.innerText="✔";
-                clearInterval(t);
-            }else c.innerText=i;
-        },1000);
-    },150);
+      }
+    },1000);
+  },150);
 });
 </script>
 
