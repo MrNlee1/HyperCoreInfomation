@@ -1,0 +1,54 @@
+/*Thay đổi kiểu chữ toàn trang và đổi màu nền web*/
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: white;
+    color: #222222;
+    line-height: 1.6;
+}
+
+/*định dạng tiêu đề chính bằng ID*/
+#main-title{
+    color: darkblue;
+    font-size: 32px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/*Định dạng phần thông tin cá nhân bằng ID*/
+#profile{
+    background-color: whitesmoke;
+}
+
+/*Sử dụng chung một class cho nhiều phần tử (các khối nội dung)*/
+.card{
+    background-color: whitesmoke;
+}
+
+/*định dạng các tiêu đề từng phần bằng Class*/
+.section-title{
+    color: darkgreen;
+    font-size: 22px;
+}
+
+/*Bỏ gạch chân của các liên kết*/
+.contact-link{
+    text-decoration: none;
+    color: mediumblue;
+}
+
+/*Thiết lập chiều rộng và chiều cao avt*/
+.avatar{
+    width: 150px;
+    height: 150px;
+}
+
+/*Định dạng danh sách các kỹ năng bằng Class*/
+.skill{
+    color: dodgerblue;
+    font-weight: bold;
+}
+
+/*Class dùng chung cho các danh sách*/
+.item-list{
+    font-size: 16px;
+}
